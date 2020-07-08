@@ -29,14 +29,19 @@ or
 - `evaluate`: evaluate model on validation set
 - `resume`: path to checkpoint
 
+### Demo IAPR-TC 12
+```sh
+python3 ML-GCN/demo_iaprtc12_gcn.py data/iaprtc12 --image-size 448 --batch-size 32 --resume checkpoint/iaprtc/checkpoint.pth.tar
+```
+
 ### Demo VOC 2007
 ```sh
-python3 demo_voc2007_gcn.py data/voc --image-size 448 --batch-size 32 -e --resume checkpoint/voc2007/checkpoint.pth.tar
+python3 ML-GCN/demo_voc2007_gcn.py data/voc --image-size 448 --batch-size 32 --resume checkpoint/voc2007/checkpoint.pth.tar
 ```
 
 ### Demo COCO 2014
 ```sh
-python3 demo_coco_gcn.py data/coco --image-size 448 --batch-size 32 -e --resume checkpoint/coco/coco_checkpoint.pth.tar
+python3 ML-GCN/demo_coco_gcn.py data/coco --image-size 448 --batch-size 32 --resume checkpoint/coco/coco_checkpoint.pth.tar
 ```
 
 ## Citing this repository
