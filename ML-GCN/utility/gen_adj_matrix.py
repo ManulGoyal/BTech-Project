@@ -8,8 +8,8 @@ import numpy as np
 
 num_categories = 291
 num_samples = 17665
-save_path = 'data/iaprtc/iaprtc_adj.pkl'
-annot_file = 'data/iaprtc/annotation/iaprtc12_train_annot.csv'
+save_path = '../data/iaprtc12/iaprtc_adj.pkl'
+annot_file = '../data/iaprtc12/annotation/iaprtc12_train_annot.csv'
 
 def read_object_labels_csv(file, header=False):
     images = np.empty((num_samples, num_categories), dtype='int64')

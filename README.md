@@ -31,7 +31,8 @@ or
 
 ### Demo IAPR-TC 12
 ```sh
-python3 ML-GCN/demo_iaprtc12_gcn.py data/iaprtc12 --image-size 448 --batch-size 32 --resume checkpoint/iaprtc/checkpoint.pth.tar
+cd ML-GCN
+python3 demo_iaprtc12_gcn.py ../data/iaprtc12 --image-size 448 --batch-size 32 --resume checkpoint/iaprtc/checkpoint.pth.tar
 ```
 
 ### Demo VOC 2007

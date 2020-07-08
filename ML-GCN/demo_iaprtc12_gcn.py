@@ -41,13 +41,13 @@ def main_iaprtc():
     use_gpu = torch.cuda.is_available()
 
     # define dataset
-    train_dataset = IAPRTC12Classification(args.data, 'trainval', inp_name='data/iaprtc/iaprtc_glove_word2vec.pkl')
-    val_dataset = IAPRTC12Classification(args.data, 'test', inp_name='data/iaprtc/iaprtc_glove_word2vec.pkl')
+    train_dataset = IAPRTC12Classification(args.data, 'trainval', inp_name=os.path.join(args.data, 'iaprtc_glove_word2vec.pkl'))
+    val_dataset = IAPRTC12Classification(args.data, 'test', inp_name=os.path.join(args.data, 'iaprtc_glove_word2vec.pkl'))
 
     num_classes = 291
 
     # load model
-    model = gcn_resnet101(num_classes=num_classes, t=0.4, adj_file='data/iaprtc/iaprtc_adj.pkl')
+    model = gcn_resnet101(num_classes=num_classes, t=0.4, adj_file=os.path.join(args.data, 'iaprtc_adj.pkl'))
 
     # define loss function (criterion)
     criterion = nn.MultiLabelSoftMarginLoss()

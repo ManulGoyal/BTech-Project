@@ -8,13 +8,13 @@ import numpy as np
 
 num_categories = 291
 
-path_to_dictionary = 'data/iaprtc/annotation/iaprtc12_dictionary.txt'
-path_to_train_list = 'data/iaprtc/annotation/iaprtc12_train_list.txt'
-path_to_test_list = 'data/iaprtc/annotation/iaprtc12_test_list.txt'
-path_to_train_annot = 'data/iaprtc/annotation/iaprtc12_train_annot.csv'
-path_to_test_annot = 'data/iaprtc/annotation/iaprtc12_test_annot.csv'
-save_path_train_labels = 'data/iaprtc/classification_trainval.csv'
-save_path_test_labels = 'data/iaprtc/classification_test.csv'
+path_to_dictionary = '../data/iaprtc12/annotation/iaprtc12_dictionary.txt'
+path_to_train_list = '../data/iaprtc12/annotation/iaprtc12_train_list.txt'
+path_to_test_list = '../data/iaprtc12/annotation/iaprtc12_test_list.txt'
+path_to_train_annot = '../data/iaprtc12/annotation/iaprtc12_train_annot.csv'
+path_to_test_annot = '../data/iaprtc12/annotation/iaprtc12_test_annot.csv'
+save_path_train_labels = '../data/iaprtc12/classification_trainval.csv'
+save_path_test_labels = '../data/iaprtc12/classification_test.csv'
 
 def read_object_labels_csv(file, header=False):
     images = []

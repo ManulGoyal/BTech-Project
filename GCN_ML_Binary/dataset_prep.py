@@ -3,8 +3,13 @@ import math
 import csv
 from tqdm import tqdm
 from sampling import *
+import argparse
 
-path_to_dataset = os.path.join('../data', 'iaprtc12')
+parser = argparse.ArgumentParser(description='Sampling for Binary GCN')
+parser.add_argument('data', metavar='PATH_TO_DATASET', type=str, help='Path to the dataset')
+parser.add_argument('--samples', '-s', default=2000, type=int, metavar='SAMPLES',
+                        help='Upper limit on number of positive and negative samples for each label')
+
 train_features_file = 'iaprtc12_data_vggf_pca_train.txt'
 test_features_file = 'iaprtc12_data_vggf_pca_test.txt'
 train_annot_file = 'annotation/iaprtc12_train_annot.csv'
@@ -18,10 +23,10 @@ train_annot_aug_file = 'annotation/train_annot_SH_augmented.csv'
 test_annot_aug_file = 'annotation/test_annot_SH_augmented.csv'
 singleton_nodes_file = 'semantic_files/singleton_nodes.csv'
 
-positive_samples_file = 'iaprtc12_positive_samples_2000.csv'
-negative_samples_file = 'iaprtc12_negative_samples_2000.csv'
+# positive_samples_file = 'iaprtc12_positive_samples_2000.csv'
+# negative_samples_file = 'iaprtc12_negative_samples_2000.csv'
 
-num_positive_negative_samples = 2000
+# num_positive_negative_samples = 2000
 
 def read_features(file):
     features = []
@@ -69,34 +74,41 @@ def get_semantic_paths_or_layers(file):
     f.close()
     return sp
 
-train_features = read_features(os.path.join(path_to_dataset, train_features_file))
-test_features = read_features(os.path.join(path_to_dataset, test_features_file))
+def main_dataset_prep():
+    global args
+    args = parser.parse_args()
 
-train_annot_aug = read_annot(os.path.join(path_to_dataset, train_annot_aug_file)).T
-test_annot_aug = read_annot(os.path.join(path_to_dataset, test_annot_aug_file)).T
+    train_features = read_features(os.path.join(args.data, train_features_file))
+    test_features = read_features(os.path.join(args.data, test_features_file))
 
-leaves = get_leaf_nodes(os.path.join(path_to_dataset, leaf_nodes_file))
-singleton_nodes = get_leaf_nodes(os.path.join(path_to_dataset, singleton_nodes_file))
+    train_annot_aug = read_annot(os.path.join(args.data, train_annot_aug_file)).T
+    test_annot_aug = read_annot(os.path.join(args.data, test_annot_aug_file)).T
 
-semantic_paths = get_semantic_paths_or_layers(os.path.join(path_to_dataset, sp_file))
-node_layers = get_semantic_paths_or_layers(os.path.join(path_to_dataset, node_layer_file))
+    leaves = get_leaf_nodes(os.path.join(args.data, leaf_nodes_file))
+    singleton_nodes = get_leaf_nodes(os.path.join(args.data, singleton_nodes_file))
 
-save_path = os.path.join(path_to_dataset, 'GCN_ML_Binary_Datasets')
+    semantic_paths = get_semantic_paths_or_layers(os.path.join(args.data, sp_file))
+    node_layers = get_semantic_paths_or_layers(os.path.join(args.data, node_layer_file))
 
-if not os.path.exists(save_path):
-    os.makedirs(save_path)
+    save_path = os.path.join(args.data, 'GCN_ML_Binary_Datasets')
 
-save_file_pos = open(os.path.join(save_path, positive_samples_file), 'w')
-save_file_neg = open(os.path.join(save_path, negative_samples_file), 'w')
-pos_writer = csv.writer(save_file_pos)
-neg_writer = csv.writer(save_file_neg)
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
 
-for lbl in tqdm(range(train_annot_aug.shape[1])):
-    positive_samples, negative_samples = positive_negative_split(lbl, 
-                                num_positive_negative_samples, semantic_paths, 
-                                node_layers, train_annot_aug, singleton_nodes)
-    pos_writer.writerow(positive_samples)
-    neg_writer.writerow(negative_samples)
+    save_file_pos = open(os.path.join(save_path, 'iaprtc12_positive_samples_' + str(args.samples) + '.csv'), 'w')
+    save_file_neg = open(os.path.join(save_path, 'iaprtc12_negative_samples_' + str(args.samples) + '.csv'), 'w')
+    pos_writer = csv.writer(save_file_pos)
+    neg_writer = csv.writer(save_file_neg)
 
-save_file_neg.close()
-save_file_pos.close()
+    for lbl in tqdm(range(train_annot_aug.shape[1])):
+        positive_samples, negative_samples = positive_negative_split(lbl, 
+                                    args.samples, semantic_paths, 
+                                    node_layers, train_annot_aug, singleton_nodes)
+        pos_writer.writerow(positive_samples)
+        neg_writer.writerow(negative_samples)
+
+    save_file_neg.close()
+    save_file_pos.close()
+
+if __name__ == '__main__':
+    main_dataset_prep()

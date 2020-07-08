@@ -12,7 +12,7 @@ import pickle
 import util
 from util import *
 
-path_to_dictionary = 'data/iaprtc/annotation/iaprtc12_dictionary.txt'
+path_to_dictionary = '../data/iaprtc12/annotation/iaprtc12_dictionary.txt'
 images_folder_path = os.path.join('iaprtc12', 'images')
 annotation_folder_path = 'annotation'
 
