@@ -4,19 +4,19 @@ import csv
 from tqdm import tqdm
 from sampling import *
 
-path_to_dataset = os.path.join('data', 'iaprtc')
+path_to_dataset = os.path.join('../data', 'iaprtc12')
 train_features_file = 'iaprtc12_data_vggf_pca_train.txt'
 test_features_file = 'iaprtc12_data_vggf_pca_test.txt'
-train_annot_file = 'iaprtc12_train_annot.csv'
-test_annot_file = 'iaprtc12_test_annot.csv'
+train_annot_file = 'annotation/iaprtc12_train_annot.csv'
+test_annot_file = 'annotation/iaprtc12_test_annot.csv'
 remove_images_train_file = 'remove_images_train.csv'
 remove_images_test_file = 'remove_images_test.csv'
-leaf_nodes_file = 'leaf_nodes.csv'
-sp_file = 'semantic_paths.txt'
-node_layer_file = 'node_layer_of_paths.txt'
-train_annot_aug_file = 'train_annot_SH_augmented.csv'
-test_annot_aug_file = 'test_annot_SH_augmented.csv'
-singleton_nodes_file = 'singleton_nodes.csv'
+leaf_nodes_file = 'semantic_files/leaf_nodes.csv'
+sp_file = 'semantic_files/semantic_paths.txt'
+node_layer_file = 'semantic_files/node_layer_of_paths.txt'
+train_annot_aug_file = 'annotation/train_annot_SH_augmented.csv'
+test_annot_aug_file = 'annotation/test_annot_SH_augmented.csv'
+singleton_nodes_file = 'semantic_files/singleton_nodes.csv'
 
 positive_samples_file = 'iaprtc12_positive_samples_2000.csv'
 negative_samples_file = 'iaprtc12_negative_samples_2000.csv'
@@ -81,8 +81,13 @@ singleton_nodes = get_leaf_nodes(os.path.join(path_to_dataset, singleton_nodes_f
 semantic_paths = get_semantic_paths_or_layers(os.path.join(path_to_dataset, sp_file))
 node_layers = get_semantic_paths_or_layers(os.path.join(path_to_dataset, node_layer_file))
 
-save_file_pos = open(os.path.join(path_to_dataset, positive_samples_file), 'w')
-save_file_neg = open(os.path.join(path_to_dataset, negative_samples_file), 'w')
+save_path = os.path.join(path_to_dataset, 'GCN_ML_Binary_Datasets')
+
+if not os.path.exists(save_path):
+    os.makedirs(save_path)
+
+save_file_pos = open(os.path.join(save_path, positive_samples_file), 'w')
+save_file_neg = open(os.path.join(save_path, negative_samples_file), 'w')
 pos_writer = csv.writer(save_file_pos)
 neg_writer = csv.writer(save_file_neg)
 
