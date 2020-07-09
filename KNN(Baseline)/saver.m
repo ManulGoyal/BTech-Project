@@ -1,32 +1,56 @@
-features = {'DenseHue.hvecs', 'DenseHueV3H1.hvecs', 'DenseSift.hvecs', 'DenseSiftV3H1.hvecs', 'Gist.fvec', ...
-    'HarrisHue.hvecs', 'HarrisHueV3H1.hvecs', 'HarrisSift.hvecs', 'HarrisSiftV3H1.hvecs', 'Hsv.hvecs32', ...
-    'HsvV3H1.hvecs32', 'Lab.hvecs32', 'LabV3H1.hvecs32', 'Rgb.hvecs32', 'RgbV3H1.hvecs32'};
-dist_metrics = {'chi_square', 'chi_square', 'chi_square', 'chi_square', 'l2', 'chi_square', ...
-    'chi_square', 'chi_square', 'chi_square', 'l1', 'l1', 'l1', 'l1', 'l1', 'l1'};
-sets = {'train', 'test'};
-datasetsCap = {'Corel5k', 'ESPGame', 'IAPRTC12'};
-datasets = {'corel5k', 'espgame', 'iaprtc12'};
-test_image_count = [499 2081 1962];
-train_image_count = [4500 18689 17665];
-dict_size = [260 268 291];
+% features = {'DenseHue.hvecs', 'DenseHueV3H1.hvecs', 'DenseSift.hvecs', 'DenseSiftV3H1.hvecs', 'Gist.fvec', ...
+%     'HarrisHue.hvecs', 'HarrisHueV3H1.hvecs', 'HarrisSift.hvecs', 'HarrisSiftV3H1.hvecs', 'Hsv.hvecs32', ...
+% 'HsvV3H1.hvecs32', 'Lab.hvecs32', 'LabV3H1.hvecs32', 'Rgb.hvecs32', 'RgbV3H1.hvecs32'};
+% dist_metrics = {'chi_square', 'chi_square', 'chi_square', 'chi_square', 'l2', 'chi_square', ...
+%     'chi_square', 'chi_square', 'chi_square', 'l1', 'l1', 'l1', 'l1', 'l1', 'l1'};
+% sets = {'train', 'test'};
+% datasetsCap = {'iaprtc12', 'ESPGame', 'IAPRTC12'};
+datasets = ['iaprtc12'];
+test_image_count = [1957];
+train_image_count = [17495];
+dict_size = [291];
+%17495
+%1957
+
+features = {'dia'};
+dist_metrics = {'l2'};
+ids = 1;   
+
 
 labels_per_image = 5;           %labels to be allotted per test image           
 nearest_neighbours = 5;         %number of nearest neighbours considered per test image
 
-ids = 1;
-
-corel5k_test_annot = double(vec_read(['datasets/' datasetsCap{ids} '/' datasets{ids} '_test_annot.hvecs']));
-corel5k_train_annot = double(vec_read(['datasets/' datasetsCap{ids} '/' datasets{ids} '_train_annot.hvecs']));
-corel5k_label_train_freq = sum(corel5k_train_annot);     
+[test_annot] = get_test_annot();
+[train_annot] = get_train_annot();
 
 
-distf = load([datasets{ids} '_distances.mat']);
-corel5k_distances = distf.distances;
+% iaprtc12_test_annot = double(vec_read(['datasets/' datasetsCap{ids} '/' datasets{ids} '_test_annot.hvecs']));
+% iaprtc12_train_annot = double(vec_read(['datasets/' datasetsCap{ids} '/' datasets{ids} '_train_annot.hvecs']));
 
-cooccur = (corel5k_train_annot.')*corel5k_train_annot;
+iaprtc12_test_annot = zeros(test_image_count(ids),dict_size(ids));
+iaprtc12_train_annot = zeros(train_image_count(ids),dict_size(ids));
+
+for i = 1:dict_size(ids)
+    for j = 1:train_image_count(ids)
+        iaprtc12_train_annot(j,i) = train_annot{1,j}(i,1)
+    end
+end
+% c = test_annot{1,1}(35,1);
+for i = 1:dict_size(ids)
+    for j = 1:test_image_count(ids)
+        iaprtc12_test_annot(j,i) = test_annot{1,j}(i,1);
+    end
+end
+
+iaprtc12_label_train_freq = sum(iaprtc12_test_annot);     
+
+distf = load('iaprtc12_distances.mat');
+iaprtc12_distances = distf.distances;
+
+cooccur = (iaprtc12_train_annot.')*iaprtc12_train_annot;
 test_labels = zeros(test_image_count(ids), dict_size(ids));
 for i = 1:test_image_count(ids)
-    distances = corel5k_distances(i, :);
+    distances = iaprtc12_distances(i, :);
     
     [~, neighbours] = sort(distances);
 
@@ -35,8 +59,8 @@ for i = 1:test_image_count(ids)
     
     % Sorting labels for nearest neighbour wrt their frequencies in
     % training dataset
-    nearest_nbr_labels = find(corel5k_train_annot(neighbours(1), :));
-    [~, label_freq_sort] = sort(corel5k_label_train_freq(nearest_nbr_labels), 'descend');
+    nearest_nbr_labels = find(iaprtc12_train_annot(neighbours(1), :));
+    [~, label_freq_sort] = sort(iaprtc12_label_train_freq(nearest_nbr_labels), 'descend');
     nearest_nbr_labels = nearest_nbr_labels(label_freq_sort);
         
     sz = numel(nearest_nbr_labels);
@@ -48,7 +72,7 @@ for i = 1:test_image_count(ids)
         % if nearest nbr has less than n labels, assign all of them to
         % test image
         labels(nearest_nbr_labels(1:sz)) = 1;
-        other_nbrs_annot = corel5k_train_annot(neighbours(2:nearest_neighbours), :);
+        other_nbrs_annot = iaprtc12_train_annot(neighbours(2:nearest_neighbours), :);
         local_labels_freq = sum(other_nbrs_annot);
         other_nbrs_labels = find(local_labels_freq);
         local_labels_cooccurrence = zeros(1, dict_size(ids));
@@ -73,9 +97,9 @@ mean_precision = 0;
 mean_recall = 0;
 n_plus = 0;
 for l = 1:dict_size(ids)
-    ground_truth = sum(corel5k_test_annot(:, l));
+    ground_truth = sum(iaprtc12_test_annot(:, l));
     predicted = sum(test_labels(:, l));
-    correct = sum(corel5k_test_annot(1:test_image_count(ids), l) & test_labels(:, l));
+    correct = sum(iaprtc12_test_annot(1:test_image_count(ids), l) & test_labels(:, l));
     if correct > 0
         n_plus = n_plus + 1;
     end
