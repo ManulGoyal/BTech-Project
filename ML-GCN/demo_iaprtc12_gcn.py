@@ -32,12 +32,16 @@ parser.add_argument('--resume', default='', type=str, metavar='PATH',
                     help='path to latest checkpoint (default: none)')
 parser.add_argument('-e', '--evaluate', dest='evaluate', action='store_true',
                     help='evaluate model on validation set')
-
+parser.add_argument('--semantic', dest='semantic_mat', action='store_true',
+                    help='generate adjacency matrix using semantic weights')
+parser.add_argument('--trick', default=1, type=int, metavar='TRICK',
+                    help='trick for semantic matrix generation')
 
 def main_iaprtc():
     global args, best_prec1, use_gpu
     args = parser.parse_args()
-
+    print(args.semantic_mat)
+    
     use_gpu = torch.cuda.is_available()
 
     # define dataset
@@ -47,7 +51,8 @@ def main_iaprtc():
     num_classes = 291
 
     # load model
-    model = gcn_resnet101(num_classes=num_classes, t=0.4, adj_file=os.path.join(args.data, 'iaprtc_adj.pkl'))
+    model = gcn_resnet101(num_classes=num_classes, t=0.4, adj_file=os.path.join(args.data, 'iaprtc_adj.pkl'),
+                            semantic_mat=args.semantic_mat, trick=args.trick, scalar=1)
 
     # define loss function (criterion)
     criterion = nn.MultiLabelSoftMarginLoss()

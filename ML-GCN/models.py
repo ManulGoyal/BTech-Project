@@ -41,11 +41,10 @@ class GraphConvolution(nn.Module):
 
 
 class GCNResnet(nn.Module):
-    # adj_matrix = "normal" or "semantic"
     # trick = 1 for A[i][j] *= (s[i]/s[j])^scalar
     # trick = 2 for A[i][j] = (s[i]/s[j]) ^ scalar
     # trick = 3 for A[i][j] *= (s[i]-s[j])
-    def __init__(self, model, num_classes, in_channel=300, t=0, adj_file=None, adj_matrix="normal", trick=1, scalar=1):
+    def __init__(self, model, num_classes, in_channel=300, t=0, adj_file=None, semantic_mat=False, trick=1, scalar=1):
         super(GCNResnet, self).__init__()
         self.features = nn.Sequential(
             model.conv1,
@@ -64,10 +63,11 @@ class GCNResnet(nn.Module):
         self.gc2 = GraphConvolution(1024, 2048)
         self.relu = nn.LeakyReLU(0.2)           # Knob
 
-        if adj_matrix == "normal":
-            _adj = gen_A(num_classes, t, adj_file)
-        else:
+        if semantic_mat:
             _adj = gen_A_semantic(adj_file, trick, scalar)
+        else:
+            _adj = gen_A(num_classes, t, adj_file)
+            
         self.A = Parameter(torch.from_numpy(_adj).float())
         # image normalization
         self.image_normalization_mean = [0.485, 0.456, 0.406]
@@ -100,6 +100,6 @@ class GCNResnet(nn.Module):
 
 
 
-def gcn_resnet101(num_classes, t, pretrained=True, adj_file=None, in_channel=300):
+def gcn_resnet101(num_classes, t, pretrained=True, adj_file=None, in_channel=300, semantic_mat=False, trick=1, scalar=1):
     model = models.resnet101(pretrained=pretrained)
-    return GCNResnet(model, num_classes, t=t, adj_file=adj_file, in_channel=in_channel)
+    return GCNResnet(model, num_classes, t=t, adj_file=adj_file, in_channel=in_channel, semantic_mat=semantic_mat, trick=trick, scalar=scalar)
