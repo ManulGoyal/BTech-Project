@@ -32,7 +32,7 @@ iaprtc12_train_annot = zeros(train_image_count(ids),dict_size(ids));
 
 for i = 1:dict_size(ids)
     for j = 1:train_image_count(ids)
-        iaprtc12_train_annot(j,i) = train_annot{1,j}(i,1)
+        iaprtc12_train_annot(j,i) = train_annot{1,j}(i,1);
     end
 end
 

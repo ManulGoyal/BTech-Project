@@ -1,10 +1,12 @@
+function get_results(test_image_count, annot_file, output_file, save_file)
+
 dict_size = 291;
 
-%image count
-test_image_count = 1957; 
+% %image count
+% test_image_count = 1957; 
 
 %annoted file
-fileId = fopen('test_annot.txt','r');
+fileId = fopen(annot_file,'r');
 test_annot = cell(1,test_image_count);
 
 for i = 1:test_image_count
@@ -14,7 +16,7 @@ end
 fclose(fileId);
 
 %generated output file here
-fileId = fopen('test_output.txt','r');
+fileId = fopen(output_file,'r');
 test_output = cell(1,test_image_count);
 
 for i = 1:test_image_count
@@ -36,4 +38,4 @@ end
 
 results = parameters_cal(output,annot);
 %name of results file
-csvwrite("results.csv",results);
+csvwrite(save_file,results);
