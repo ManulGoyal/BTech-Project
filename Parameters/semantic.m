@@ -36,10 +36,10 @@ for i = 1:num_instance_test
     [prec(i), rec(i), F1(i)] = semantic_parameters(pred_subset_i, gt_subset_i);
 end
 
-mean_pre = mean(prec)
-mean_rec = mean(rec)
-mean_f1 = mean(F1)
-
+mean_pre = 100*mean(prec)
+mean_rec = 100*mean(rec)
+mean_f1 = 100*mean(F1)
+exp_f1 = 2*mean_pre*mean_rec/(mean_rec + mean_pre + 0.0000000001)
 % [mean(prec), mean(rec), mean(F1); std(prec), std(rec), std(F1)]
 
 end % of funtion

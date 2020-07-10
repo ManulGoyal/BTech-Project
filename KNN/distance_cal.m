@@ -94,6 +94,7 @@ for i = 1:test_image_count(ids)
     end
 end
 
+csvwrite("iaprtc12_distances.csv",distances);
 save('iaprtc12_distances.mat', 'distances', '-v7.3');
 
 % save([datasets{ids} '_distances.mat'], 'distances', '-v7.3');

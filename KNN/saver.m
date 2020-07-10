@@ -35,12 +35,14 @@ for i = 1:dict_size(ids)
         iaprtc12_train_annot(j,i) = train_annot{1,j}(i,1)
     end
 end
-% c = test_annot{1,1}(35,1);
+
 for i = 1:dict_size(ids)
     for j = 1:test_image_count(ids)
         iaprtc12_test_annot(j,i) = test_annot{1,j}(i,1);
     end
 end
+
+% [results] = parameters_cal(iaprtc12_test_annot,iaprtc12_test_annot);
 
 iaprtc12_label_train_freq = sum(iaprtc12_test_annot);     
 
@@ -93,21 +95,6 @@ for i = 1:test_image_count(ids)
 
 
 end
-mean_precision = 0;
-mean_recall = 0;
-n_plus = 0;
-for l = 1:dict_size(ids)
-    ground_truth = sum(iaprtc12_test_annot(:, l));
-    predicted = sum(test_labels(:, l));
-    correct = sum(iaprtc12_test_annot(1:test_image_count(ids), l) & test_labels(:, l));
-    if correct > 0
-        n_plus = n_plus + 1;
-    end
-    mean_precision = mean_precision + correct/(predicted+1e-10);
-    mean_recall = mean_recall + correct/ground_truth;
-end
-mean_precision = 100*mean_precision/dict_size(ids);
-mean_recall = 100*mean_recall/dict_size(ids);
-f1_score = 2 * mean_precision * mean_recall / (mean_precision + mean_recall + 1e-10);
-results = [mean_precision mean_recall f1_score n_plus];
-save([datasets{ids} '_results.mat'], 'results');
+
+
+csvwrite("iaprtc12_knn_output.csv",test_labels);
