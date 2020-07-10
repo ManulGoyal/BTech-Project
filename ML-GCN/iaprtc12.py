@@ -136,7 +136,7 @@ class IAPRTC12Classification(data.Dataset):
 
         # create the csv file if necessary
         if not os.path.exists(file_csv):
-            print('doin')
+            print('[Dataset] Writing ' + set + ' classification csv file')
             # if not os.path.exists(path_csv):  # create dir if necessary
             #     os.makedirs(path_csv)
             # generate csv file

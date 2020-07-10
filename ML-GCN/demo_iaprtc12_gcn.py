@@ -40,8 +40,8 @@ parser.add_argument('--trick', default=1, type=int, metavar='TRICK',
 def main_iaprtc():
     global args, best_prec1, use_gpu
     args = parser.parse_args()
-    print(args.semantic_mat)
-    
+    # print(args.semantic_mat)
+
     use_gpu = torch.cuda.is_available()
 
     # define dataset

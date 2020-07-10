@@ -147,8 +147,9 @@ def gen_A_with_semantic_weights_iaprtc12(adj_A, trick, scalar = 1):
                 gen_A[i][j] = adj_A[i][j]*(semantic_weight[i]-semantic_weight[j])
             else:
                 gen_A[i][j] = adj_A[i][j]  
-    
-    return gen_A
+    # print(gen_A)
+
+    return np.asarray(gen_A, dtype=float)
 
 # A = [[1,1],[2,1]]
 # B = gen_A_with_semantic_weights_iaprtc12(A,2,2)
