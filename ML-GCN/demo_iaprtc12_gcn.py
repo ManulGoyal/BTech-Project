@@ -65,7 +65,10 @@ def main_iaprtc():
     state = {'batch_size': args.batch_size, 'image_size': args.image_size, 'max_epochs': args.epochs,
              'evaluate': args.evaluate, 'resume': args.resume, 'num_classes':num_classes}
     state['difficult_examples'] = True
-    state['save_model_path'] = 'checkpoint/iaprtc/'
+    if args.semantic_mat:
+        state['save_model_path'] = 'checkpoint/iaprtc_semantic/'
+    else:
+        state['save_model_path'] = 'checkpoint/iaprtc/'
     state['workers'] = args.workers
     state['epoch_step'] = args.epoch_step
     state['lr'] = args.lr
