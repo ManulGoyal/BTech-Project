@@ -25,3 +25,5 @@
 /data/iaprtc12/classification_test.csv
 /KNN/iaprtc12_knn_output.csv
 /Parameters/results_knn.csv
+/data/iaprtc12/GCN_ML_Binary_Datasets/agg_features_train_2000.pkl
+/data/iaprtc12/GCN_ML_Binary_Datasets/agg_features_test_2000.pkl
