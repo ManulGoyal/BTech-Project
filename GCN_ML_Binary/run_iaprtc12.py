@@ -4,6 +4,7 @@ import csv
 import os
 import numpy as np
 import math
+import pickle
 
 parser = argparse.ArgumentParser()
 parser.add_argument('data', metavar='DIR',
@@ -20,51 +21,72 @@ def read_csv(file, dtype):
         csvf = csv.reader(f)
         return [[dtype(x) for x in row] for row in csvf]
 
+def write_csv(file, matrix):
+    with open(file) as f:
+        csvw = csv.writer(f)
+        for row in matrix:
+            csvw.writerow(row)
+
 def main_iaprtc12():
     args = parser.parse_args()
-
+    
     pos_file = os.path.join(args.data, 'GCN_ML_Binary_Datasets', f'iaprtc12_positive_samples_{args.samples}.csv')
     neg_file = os.path.join(args.data, 'GCN_ML_Binary_Datasets', f'iaprtc12_negative_samples_{args.samples}.csv')
-    train_feature_file = os.path.join(args.data, 'iaprtc12_data_vggf_pca_train.txt')
-    test_feature_file = os.path.join(args.data, 'iaprtc12_data_vggf_pca_test.txt')
+    # train_feature_file = os.path.join(args.data, 'iaprtc12_data_vggf_pca_train.txt')
+    # test_feature_file = os.path.join(args.data, 'iaprtc12_data_vggf_pca_test.txt')
     test_annot_file = os.path.join(args.data, 'annotation', 'iaprtc12_test_annot.csv')
+    delete_test_file = os.path.join(args.data, 'remove_images_test.csv')
+
+    test_agg_save_file = os.path.join(args.data, 'GCN_ML_Binary_Datasets', f'agg_features_test_{args.samples}.pkl')
+    train_agg_save_file = os.path.join(args.data, 'GCN_ML_Binary_Datasets', f'agg_features_train_{args.samples}.pkl')
 
     pos_samples = read_csv(pos_file, dtype=int)
     neg_samples = read_csv(neg_file, dtype=int)
     test_annot = np.asarray(read_csv(test_annot_file, dtype=int), dtype=int)
-    train_features = np.asarray(read_csv(train_feature_file, dtype=float), dtype=float)
-    test_features = np.asarray(read_csv(test_feature_file, dtype=float), dtype=float)
+    # train_features = np.asarray(read_csv(train_feature_file, dtype=float), dtype=float)
+    # test_features = np.asarray(read_csv(test_feature_file, dtype=float), dtype=float)
+    delete_test_images = read_csv(delete_test_file, dtype=int)
+    test_annot = np.delete(test_annot, delete_test_images, 0)
+
+    test_agg_file = open(test_agg_save_file, 'rb')
+    train_agg_file = open(train_agg_save_file, 'rb')
+
+    test_agg_features = pickle.load(test_agg_file)
+    train_agg_features = pickle.load(train_agg_file)
 
     num_classes = test_annot.shape[1]
-    feat_dim = train_features.shape[1]
-
-    for i in range(train_features.shape[0]):
-        train_features[i] = train_features[i] / (math.sqrt(sum(train_features[i] ** 2)))
+    feat_dim = 536
+    # print(train_agg_features[2].shape)
+    # test_agg_features[2] = test_agg_features[2].reshape(1957, 536)
+    # for i in range(train_features.shape[0]):
+    #     train_features[i] = train_features[i] / (math.sqrt(sum(train_features[i] ** 2)))
     
-    for i in range(test_features.shape[0]):
-        test_features[i] = test_features[i] / (math.sqrt(sum(test_features[i] ** 2)))
+    # for i in range(test_features.shape[0]):
+    #     test_features[i] = test_features[i] / (math.sqrt(sum(test_features[i] ** 2)))
 
-    print(len(pos_samples))
-
+    # print(len(pos_samples))
+    # print(test_annot.shape[0])
 
     # total_features = np.concatenate((train_features, test_features), axis=0)
 
     # train_features_agg = findNeighbourAggregation(train_features)
     # test_features_agg = doAggregation(total_features, test_features)
 
-    for i in range(1):
+    for i in range(2, 3):
         pos_samples_i = pos_samples[i]
         neg_samples_i = neg_samples[i]
-        train_features_i = train_features[pos_samples_i+neg_samples_i]
-        total_features_i = np.concatenate((train_features_i, test_features), axis=0)
-        train_features_agg_i = findNeighbourAggregation(train_features_i)
-        test_features_agg_i = doAggregation(total_features_i, test_features)
+        # train_features_i = train_features[pos_samples_i+neg_samples_i]
+        # total_features_i = np.concatenate((train_features_i, test_features), axis=0)
+        train_features_agg_i = train_agg_features[i]
+        # print(train_features_agg_i.shape)
+        test_features_agg_i = test_agg_features[i]
+        # print(test_features_agg_i.shape)
         train_labels_i = [[1] for _ in pos_samples_i]
         train_labels_i += [[0] for _ in neg_samples_i]
         train_labels_i = np.asarray(train_labels_i, dtype=int)
         test_labels_i = [[tag] for tag in test_annot[:, i]]
         test_labels_i = np.asarray(test_labels_i, dtype=int)
-        W, Z = trainGCN(train_features_agg_i, train_labels_i, feat_dim, epochs, lr)
+        W, Z = trainGCN(train_features_agg_i, train_labels_i, feat_dim, args.epochs, args.lr)
         trainAcc = computeAcc(W, Z, train_features_agg_i, train_labels_i)
         testAcc = computeAcc(W, Z, test_features_agg_i, test_labels_i)
 

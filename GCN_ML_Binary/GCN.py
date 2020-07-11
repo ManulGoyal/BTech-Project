@@ -15,11 +15,14 @@ def trainGCN(data, labels, feature_dim, iterations, lr=0.5):
 
   for i in tqdm(range(iterations)):     # tqdm
     # Forward pass      
+    # print(data.shape)z
     X1 = np.dot(data, W)
+    # print(X1.shape)
     X11 = 1 / (1 + np.exp(-(X1)))
     X2 = np.dot(X11, Z)
+    # print(X2.shape)
     X22 = 1 / (1 + np.exp(-(X2)))
-
+    # print(labels.shape)
     # Backprop 
     L = (labels - X22) / rows
     L1 = L * (X22 * (1 - X22))
@@ -99,7 +102,7 @@ def neighAggForNode(data, node):
   dist = [] 
   idx  = [] # store the 5 index which are nearest to the curr index
 
-  for i in tqdm(range(totalRows)):    # tqdm
+  for i in range(totalRows):   
     d = findDist(row1, data[i])
 
     # here data already contains the node so computing 6 (5 neigh + 1 self)
@@ -126,7 +129,7 @@ def doAggregation(trainData, newData):
   totalRows, totalCols = newData.shape
   finalAgg = []
 
-  for i in range(totalRows):
+  for i in tqdm(range(totalRows)):    #tqdm
     agg = neighAggForNode(trainData, newData[i])
     finalAgg.append(agg)
 
@@ -136,8 +139,10 @@ def doAggregation(trainData, newData):
 # if prob > 0.5 treat as class 1 else as class 0
 def interpretResult(result):
   size = len(result)
+  # print(size)
   newResult = np.ones((size,1), int)
   for i in range(size):
+    # print(result[i])
     if (result[i] > 0.5):
       newResult[i] = 1
     else:
@@ -147,11 +152,14 @@ def interpretResult(result):
 
 
 def computeAcc(W, Z, data, labels):
+  # print(data.shape)
   X1 = np.dot(data, W)
+  # print(X1.shape)
   X11 = 1 / (1 + np.exp(-(X1)))
   X2 = np.dot(X11, Z)
+  # print(X2.shape)
   X22 = 1 / (1 + np.exp(-(X2)))
-
+  # print(labels.shape)
   return metrics.accuracy_score(interpretResult(X22), labels)
 
   
