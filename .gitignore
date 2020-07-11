@@ -23,3 +23,5 @@
 /data/iaprtc12/iaprtc12/
 /data/iaprtc12/classification_trainval.csv
 /data/iaprtc12/classification_test.csv
+/KNN/iaprtc12_knn_output.csv
+/Parameters/results_knn.csv

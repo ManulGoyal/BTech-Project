@@ -3,21 +3,17 @@ from sklearn import model_selection, preprocessing, linear_model, naive_bayes, m
 from sklearn.neighbors import KNeighborsClassifier
 import math
 import numpy as np
-
+from tqdm import tqdm
 
 # func to train a GCN
-def trainGCN(data, labels):
+def trainGCN(data, labels, feature_dim, iterations, lr=0.5):
   rows, cols = data.shape
 
   # initialize the W and Z matrix
-  W = (np.random.random((30, 30)) - 0.5) / 10
-  Z = (np.random.random((30, 1)) - 0.5) / 10
+  W = (np.random.random((feature_dim, feature_dim)) - 0.5) / 10
+  Z = (np.random.random((feature_dim, 1)) - 0.5) / 10
 
-  # initialize total iterations & learning rate
-  iterations = 1000
-  lr = 0.5
-
-  for i in range(iterations):
+  for i in tqdm(range(iterations)):     # tqdm
     # Forward pass      
     X1 = np.dot(data, W)
     X11 = 1 / (1 + np.exp(-(X1)))
@@ -57,7 +53,7 @@ def findNeighbourAggregation(data):
   totalRows, totalCols = data.shape
   finalAgg = []
 
-  for i in range(totalRows):
+  for i in tqdm(range(totalRows)):      # tqdm
 
     row1 = data[i]
     dist = [] 
@@ -103,7 +99,7 @@ def neighAggForNode(data, node):
   dist = [] 
   idx  = [] # store the 5 index which are nearest to the curr index
 
-  for i in range(totalRows):
+  for i in tqdm(range(totalRows)):    # tqdm
     d = findDist(row1, data[i])
 
     # here data already contains the node so computing 6 (5 neigh + 1 self)
@@ -171,34 +167,34 @@ def interpretLabel(lbl):
   return newLabel
 
 
-# load the pre-processed data
-train = pd.read_csv('data/train.data', header=None)
-val   = pd.read_csv('data/val.data', header=None)
-test  = pd.read_csv('data/test.data', header=None)
+# # load the pre-processed data
+# train = pd.read_csv('data/train.data', header=None)
+# val   = pd.read_csv('data/val.data', header=None)
+# test  = pd.read_csv('data/test.data', header=None)
 
-trainFeatures = train.drop([0], axis=1)
-trainLabels   = train[0]
+# trainFeatures = train.drop([0], axis=1)
+# trainLabels   = train[0]
 
-valFeatures = val.drop([0], axis=1)
-valLabels   = val[0]
+# valFeatures = val.drop([0], axis=1)
+# valLabels   = val[0]
 
-testFeatures = test.drop([0], axis=1)
-testLabels   = test[0]
+# testFeatures = test.drop([0], axis=1)
+# testLabels   = test[0]
 
-totalFeaturesVec = np.concatenate((trainFeatures.values, valFeatures.values, testFeatures.values), axis=0)
+# totalFeaturesVec = np.concatenate((trainFeatures.values, valFeatures.values, testFeatures.values), axis=0)
 
-# performing the neighbourhood aggregation
-aggTrainFeatures = findNeighbourAggregation(trainFeatures.values)
-aggValFeatures   = doAggregation(totalFeaturesVec, valFeatures.values)
-aggTestFeatures  = doAggregation(totalFeaturesVec, testFeatures.values)
+# # performing the neighbourhood aggregation
+# aggTrainFeatures = findNeighbourAggregation(trainFeatures.values)
+# aggValFeatures   = doAggregation(totalFeaturesVec, valFeatures.values)
+# aggTestFeatures  = doAggregation(totalFeaturesVec, testFeatures.values)
 
-W, Z = trainGCN(aggTrainFeatures, interpretLabel(trainLabels.values))
+# W, Z = trainGCN(aggTrainFeatures, interpretLabel(trainLabels.values))
 
-trainAcc = computeAcc(W, Z, aggTrainFeatures, interpretLabel(trainLabels.values))
-valAcc   = computeAcc(W, Z, aggValFeatures, interpretLabel(valLabels.values))
-testAcc  = computeAcc(W, Z, aggTestFeatures, interpretLabel(testLabels.values))
+# trainAcc = computeAcc(W, Z, aggTrainFeatures, interpretLabel(trainLabels.values))
+# valAcc   = computeAcc(W, Z, aggValFeatures, interpretLabel(valLabels.values))
+# testAcc  = computeAcc(W, Z, aggTestFeatures, interpretLabel(testLabels.values))
 
-print('----------GCN---------')
-print('Train Accuracy : ', trainAcc)
-print('Val   Accuracy : ', valAcc)
-print('Test  Accuracy : ', testAcc)
+# print('----------GCN---------')
+# print('Train Accuracy : ', trainAcc)
+# print('Val   Accuracy : ', valAcc)
+# print('Test  Accuracy : ', testAcc)
