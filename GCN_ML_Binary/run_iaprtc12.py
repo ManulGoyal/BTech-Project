@@ -15,6 +15,14 @@ parser.add_argument('--epochs', default=1000, type=int, metavar='N',
                     help='number of total epochs to run')
 parser.add_argument('--lr', '--learning-rate', default=0.5, type=float,
                     metavar='LR', help='learning rate')                    
+parser.add_argument('--start', type=int, default=0, metavar="START",
+                    help='index of label to start training at')
+parser.add_argument('--end', type=int, default=290, metavar="END",
+                    help='index of label to end training at')
+parser.add_argument('--model', type=str, default='GCN_ML_Binary_Datasets/model/model.pkl',
+                    metavar="PATH", help='path to file to save model in')
+parser.add_argument('--resume', dest='resume', action='store_true',
+                    help='set this flag to resume training from model file last epoch')
 
 def read_csv(file, dtype):
     with open(file) as f:
@@ -39,6 +47,7 @@ def main_iaprtc12():
 
     test_agg_save_file = os.path.join(args.data, 'GCN_ML_Binary_Datasets', f'agg_features_test_{args.samples}.pkl')
     train_agg_save_file = os.path.join(args.data, 'GCN_ML_Binary_Datasets', f'agg_features_train_{args.samples}.pkl')
+    model_save_file = os.path.join(args.data, args.model)
 
     pos_samples = read_csv(pos_file, dtype=int)
     neg_samples = read_csv(neg_file, dtype=int)
@@ -71,8 +80,20 @@ def main_iaprtc12():
 
     # train_features_agg = findNeighbourAggregation(train_features)
     # test_features_agg = doAggregation(total_features, test_features)
+    basedir_model = os.path.split(model_save_file)[0]
+    if not os.path.exists(basedir_model):
+        os.makedirs(basedir_model)
 
-    for i in range(2, 3):
+    models = {}
+
+    if os.path.exists(model_save_file):
+        f = open(model_save_file, 'rb')
+        models = pickle.load(f)
+        f.close()
+    else:
+        print(f"No file at {model_save_file} found")
+
+    for i in range(args.start, args.end+1):
         pos_samples_i = pos_samples[i]
         neg_samples_i = neg_samples[i]
         # train_features_i = train_features[pos_samples_i+neg_samples_i]
@@ -86,12 +107,28 @@ def main_iaprtc12():
         train_labels_i = np.asarray(train_labels_i, dtype=int)
         test_labels_i = [[tag] for tag in test_annot[:, i]]
         test_labels_i = np.asarray(test_labels_i, dtype=int)
-        W, Z = trainGCN(train_features_agg_i, train_labels_i, feat_dim, args.epochs, args.lr)
-        trainAcc = computeAcc(W, Z, train_features_agg_i, train_labels_i)
-        testAcc = computeAcc(W, Z, test_features_agg_i, test_labels_i)
+        
+        W = Z = None
+        last_epochs = 0
+        if args.resume:
+            if i in models.keys():
+                W, Z, last_epochs = models[i]['W'], models[i]['Z'], models[i]['epochs']
+        if args.epochs > last_epochs:
+            W, Z = trainGCNBest(train_features_agg_i, train_labels_i, feat_dim, args.epochs - last_epochs, i, 
+            test_features_agg_i, test_labels_i, last_epochs, lr=args.lr, W=W, Z=Z)
+            train_pred, trainAcc = computeAcc(W, Z, train_features_agg_i, train_labels_i)
+            test_pred, testAcc = computeAcc(W, Z, test_features_agg_i, test_labels_i)
+            model_i = {'W' : W, 'Z' : Z, 'epochs' : args.epochs, 'train_pred' : train_pred,
+                       'train_acc' : trainAcc, 'test_pred' : test_pred, 'test_acc' : testAcc}
+            print('Train acc: ' + str(trainAcc))
+            print('Test acc: ' + str(testAcc))
+            models[i] = model_i
+        else:
+            print('Epochs less than or equal to before!')
 
-        print('Train acc: ' + str(trainAcc))
-        print('Test acc: ' + str(testAcc))
+    f = open(model_save_file, 'wb')
+    pickle.dump(models, f)
+    f.close()
 
 if __name__ == '__main__':
     main_iaprtc12()

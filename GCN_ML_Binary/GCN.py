@@ -4,14 +4,18 @@ from sklearn.neighbors import KNeighborsClassifier
 import math
 import numpy as np
 from tqdm import tqdm
+import os
+import pickle
 
 # func to train a GCN
-def trainGCN(data, labels, feature_dim, iterations, lr=0.5):
+def trainGCN(data, labels, feature_dim, iterations, lr=0.5, W=None, Z=None):
   rows, cols = data.shape
 
   # initialize the W and Z matrix
-  W = (np.random.random((feature_dim, feature_dim)) - 0.5) / 10
-  Z = (np.random.random((feature_dim, 1)) - 0.5) / 10
+  if W is None:
+    W = (np.random.random((feature_dim, feature_dim)) - 0.5) / 10
+  if Z is None:
+    Z = (np.random.random((feature_dim, 1)) - 0.5) / 10
 
   for i in tqdm(range(iterations)):     # tqdm
     # Forward pass      
@@ -35,6 +39,65 @@ def trainGCN(data, labels, feature_dim, iterations, lr=0.5):
 
   return W, Z
 
+# trial
+def trainGCNBest(data, labels, feature_dim, iterations, lbl, test_data, test_labels, cur_epochs, lr=0.5, W=None, Z=None):
+  file = '../data/iaprtc12/GCN_ML_Binary_Datasets/model/model_best.pkl'
+  model = {}
+  if os.path.exists(file):
+    f = open(file, 'rb')
+    model = pickle.load(f)
+    f.close()
+  if lbl in model.keys():
+    best_test_acc = model[lbl]['test_acc']
+  else:
+    best_test_acc = 0
+
+  rows, cols = data.shape
+
+  # initialize the W and Z matrix
+  if W is None:
+    W = (np.random.random((feature_dim, feature_dim)) - 0.5) / 10
+  if Z is None:
+    Z = (np.random.random((feature_dim, 1)) - 0.5) / 10
+
+  for i in tqdm(range(iterations)):     # tqdm
+    # Forward pass      
+    # print(data.shape)z
+    X1 = np.dot(data, W)
+    # print(X1.shape)
+    X11 = 1 / (1 + np.exp(-(X1)))
+    X2 = np.dot(X11, Z)
+    # print(X2.shape)
+    X22 = 1 / (1 + np.exp(-(X2)))
+    # print(labels.shape)
+
+    # Backprop 
+    L = (labels - X22) / rows
+    L1 = L * (X22 * (1 - X22))
+    L11 = L1.dot(Z.T)
+    L2 = L11 * (X11 * (1 - X11))
+
+    # Weight update
+    Z += (lr * (X11.T.dot(L1)))
+    W += (lr * (data.T.dot(L2)))
+
+    test_pred, test_acc = computeAcc(W, Z, test_data, test_labels)
+    train_pred, train_acc = computeAcc(W, Z, data, labels)
+    if test_acc > best_test_acc:
+      best_test_acc = test_acc
+      model[lbl] = {
+        'W' : W,
+        'Z' : Z,
+        'epochs' : cur_epochs+i+1,
+        'train_pred' : train_pred,
+        'train_acc' : train_acc,
+        'test_pred' : test_pred,
+        'test_acc' : test_acc
+      }
+  f = open(file, 'wb')
+  pickle.dump(model, f)
+  f.close()
+  return W, Z
 
 # find the euclidian dist between two vectors
 def findDist(vec1, vec2):
@@ -160,7 +223,7 @@ def computeAcc(W, Z, data, labels):
   # print(X2.shape)
   X22 = 1 / (1 + np.exp(-(X2)))
   # print(labels.shape)
-  return metrics.accuracy_score(interpretResult(X22), labels)
+  return X22, metrics.accuracy_score(interpretResult(X22), labels)
 
   
 def interpretLabel(lbl):
