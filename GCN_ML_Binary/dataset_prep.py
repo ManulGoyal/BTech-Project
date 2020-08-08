@@ -95,6 +95,7 @@ def main_dataset_prep():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
+
     save_file_pos = open(os.path.join(save_path, 'iaprtc12_positive_samples_' + str(args.samples) + '.csv'), 'w')
     save_file_neg = open(os.path.join(save_path, 'iaprtc12_negative_samples_' + str(args.samples) + '.csv'), 'w')
     pos_writer = csv.writer(save_file_pos)
