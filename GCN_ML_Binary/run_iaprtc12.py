@@ -30,7 +30,7 @@ def read_csv(file, dtype):
         return [[dtype(x) for x in row] for row in csvf]
 
 def write_csv(file, matrix):
-    with open(file) as f:
+    with open(file, 'w') as f:
         csvw = csv.writer(f)
         for row in matrix:
             csvw.writerow(row)

@@ -1,6 +1,4 @@
-function get_results(test_image_count, annot_file, output_file, save_file)
-
-dict_size = 291;
+function get_results(test_image_count, dict_size, annot_file, output_file, save_file)
 
 % %image count
 % test_image_count = 1957; 
