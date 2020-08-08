@@ -110,7 +110,7 @@ import math
 
 
 """
-trick = 1 :A[i][j] = adj_A[i][j]*(s[i]/s[j])*scalar 
+trick = 1 :A[i][j] = adj_A[i][j]*(s[i]/s[j])^scalar 
 trick = 2 :A[i][j] = (s[i]/s[j])*scalar
 trick = 3 :A[i][j] = adj_A[i][j]*(s[i]-s[j])
 """
