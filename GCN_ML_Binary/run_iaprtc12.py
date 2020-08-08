@@ -93,7 +93,9 @@ def main_iaprtc12():
     else:
         print(f"No file at {model_save_file} found")
 
+    
     for i in range(args.start, args.end+1):
+        print('Training for label ' + str(i+1))
         pos_samples_i = pos_samples[i]
         neg_samples_i = neg_samples[i]
         # train_features_i = train_features[pos_samples_i+neg_samples_i]
@@ -126,9 +128,11 @@ def main_iaprtc12():
         else:
             print('Epochs less than or equal to before!')
 
-    f = open(model_save_file, 'wb')
-    pickle.dump(models, f)
-    f.close()
+        print('Saving model...')
+        f = open(model_save_file, 'wb')
+        pickle.dump(models, f)
+        f.close()
+    
 
 if __name__ == '__main__':
     main_iaprtc12()
