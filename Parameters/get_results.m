@@ -36,6 +36,6 @@ for i = 1:test_image_count
 end
 
 
-results = parameters_cal(output,annot);
+results = parameters_cal(output,annot,test_image_count);
 %name of results file
 csvwrite(save_file,results);
