@@ -31,8 +31,8 @@ F1   = zeros(num_instance_test,1);
 for i = 1:num_instance_test
     % pred_subset_i = test_result_DIA_inference.sampled_label_subsets{i};
 
-    pred_subset_i = find(test_labels(:,i)==1);
-    gt_subset_i = find(label_test_gt(:,i)==1);
+    pred_subset_i = find(test_labels(i,:)==1);
+    gt_subset_i = find(label_test_gt(i,:)==1);
     [prec(i), rec(i), F1(i)] = semantic_parameters(pred_subset_i, gt_subset_i);
 end
 
