@@ -3,27 +3,30 @@ from sklearn import model_selection, preprocessing, linear_model, naive_bayes, m
 from sklearn.neighbors import KNeighborsClassifier
 import math
 import numpy as np
-
+from tqdm import tqdm
+import os
+import pickle
 
 # func to train a GCN
-def trainGCN(data, labels):
+def trainGCN(data, labels, feature_dim, iterations, lr=0.5, W=None, Z=None):
   rows, cols = data.shape
 
   # initialize the W and Z matrix
-  W = (np.random.random((30, 30)) - 0.5) / 10
-  Z = (np.random.random((30, 1)) - 0.5) / 10
+  if W is None:
+    W = (np.random.random((feature_dim, feature_dim)) - 0.5) / 10
+  if Z is None:
+    Z = (np.random.random((feature_dim, 1)) - 0.5) / 10
 
-  # initialize total iterations & learning rate
-  iterations = 1000
-  lr = 0.5
-
-  for i in range(iterations):
+  for i in tqdm(range(iterations)):     # tqdm
     # Forward pass      
+    # print(data.shape)z
     X1 = np.dot(data, W)
+    # print(X1.shape)
     X11 = 1 / (1 + np.exp(-(X1)))
     X2 = np.dot(X11, Z)
+    # print(X2.shape)
     X22 = 1 / (1 + np.exp(-(X2)))
-
+    # print(labels.shape)
     # Backprop 
     L = (labels - X22) / rows
     L1 = L * (X22 * (1 - X22))
@@ -36,6 +39,65 @@ def trainGCN(data, labels):
 
   return W, Z
 
+# trial
+def trainGCNBest(data, labels, feature_dim, iterations, lbl, test_data, test_labels, cur_epochs, lr=0.5, W=None, Z=None):
+  file = '../data/iaprtc12/GCN_ML_Binary_Datasets/model/model_best.pkl'
+  model = {}
+  if os.path.exists(file):
+    f = open(file, 'rb')
+    model = pickle.load(f)
+    f.close()
+  if lbl in model.keys():
+    best_test_acc = model[lbl]['test_acc']
+  else:
+    best_test_acc = 0
+
+  rows, cols = data.shape
+
+  # initialize the W and Z matrix
+  if W is None:
+    W = (np.random.random((feature_dim, feature_dim)) - 0.5) / 10
+  if Z is None:
+    Z = (np.random.random((feature_dim, 1)) - 0.5) / 10
+
+  for i in tqdm(range(iterations)):     # tqdm
+    # Forward pass      
+    # print(data.shape)z
+    X1 = np.dot(data, W)
+    # print(X1.shape)
+    X11 = 1 / (1 + np.exp(-(X1)))
+    X2 = np.dot(X11, Z)
+    # print(X2.shape)
+    X22 = 1 / (1 + np.exp(-(X2)))
+    # print(labels.shape)
+
+    # Backprop 
+    L = (labels - X22) / rows
+    L1 = L * (X22 * (1 - X22))
+    L11 = L1.dot(Z.T)
+    L2 = L11 * (X11 * (1 - X11))
+
+    # Weight update
+    Z += (lr * (X11.T.dot(L1)))
+    W += (lr * (data.T.dot(L2)))
+
+    test_pred, test_acc = computeAcc(W, Z, test_data, test_labels)
+    train_pred, train_acc = computeAcc(W, Z, data, labels)
+    if test_acc > best_test_acc:
+      best_test_acc = test_acc
+      model[lbl] = {
+        'W' : W,
+        'Z' : Z,
+        'epochs' : cur_epochs+i+1,
+        'train_pred' : train_pred,
+        'train_acc' : train_acc,
+        'test_pred' : test_pred,
+        'test_acc' : test_acc
+      }
+  f = open(file, 'wb')
+  pickle.dump(model, f)
+  f.close()
+  return W, Z
 
 # find the euclidian dist between two vectors
 def findDist(vec1, vec2):
@@ -57,7 +119,7 @@ def findNeighbourAggregation(data):
   totalRows, totalCols = data.shape
   finalAgg = []
 
-  for i in range(totalRows):
+  for i in tqdm(range(totalRows)):      # tqdm
 
     row1 = data[i]
     dist = [] 
@@ -103,7 +165,7 @@ def neighAggForNode(data, node):
   dist = [] 
   idx  = [] # store the 5 index which are nearest to the curr index
 
-  for i in range(totalRows):
+  for i in range(totalRows):   
     d = findDist(row1, data[i])
 
     # here data already contains the node so computing 6 (5 neigh + 1 self)
@@ -130,7 +192,7 @@ def doAggregation(trainData, newData):
   totalRows, totalCols = newData.shape
   finalAgg = []
 
-  for i in range(totalRows):
+  for i in tqdm(range(totalRows)):    #tqdm
     agg = neighAggForNode(trainData, newData[i])
     finalAgg.append(agg)
 
@@ -140,8 +202,10 @@ def doAggregation(trainData, newData):
 # if prob > 0.5 treat as class 1 else as class 0
 def interpretResult(result):
   size = len(result)
+  # print(size)
   newResult = np.ones((size,1), int)
   for i in range(size):
+    # print(result[i])
     if (result[i] > 0.5):
       newResult[i] = 1
     else:
@@ -151,12 +215,15 @@ def interpretResult(result):
 
 
 def computeAcc(W, Z, data, labels):
+  # print(data.shape)
   X1 = np.dot(data, W)
+  # print(X1.shape)
   X11 = 1 / (1 + np.exp(-(X1)))
   X2 = np.dot(X11, Z)
+  # print(X2.shape)
   X22 = 1 / (1 + np.exp(-(X2)))
-
-  return metrics.accuracy_score(interpretResult(X22), labels)
+  # print(labels.shape)
+  return X22, metrics.accuracy_score(interpretResult(X22), labels)
 
   
 def interpretLabel(lbl):
@@ -171,34 +238,34 @@ def interpretLabel(lbl):
   return newLabel
 
 
-# load the pre-processed data
-train = pd.read_csv('data/train.data', header=None)
-val   = pd.read_csv('data/val.data', header=None)
-test  = pd.read_csv('data/test.data', header=None)
+# # load the pre-processed data
+# train = pd.read_csv('data/train.data', header=None)
+# val   = pd.read_csv('data/val.data', header=None)
+# test  = pd.read_csv('data/test.data', header=None)
 
-trainFeatures = train.drop([0], axis=1)
-trainLabels   = train[0]
+# trainFeatures = train.drop([0], axis=1)
+# trainLabels   = train[0]
 
-valFeatures = val.drop([0], axis=1)
-valLabels   = val[0]
+# valFeatures = val.drop([0], axis=1)
+# valLabels   = val[0]
 
-testFeatures = test.drop([0], axis=1)
-testLabels   = test[0]
+# testFeatures = test.drop([0], axis=1)
+# testLabels   = test[0]
 
-totalFeaturesVec = np.concatenate((trainFeatures.values, valFeatures.values, testFeatures.values), axis=0)
+# totalFeaturesVec = np.concatenate((trainFeatures.values, valFeatures.values, testFeatures.values), axis=0)
 
-# performing the neighbourhood aggregation
-aggTrainFeatures = findNeighbourAggregation(trainFeatures.values)
-aggValFeatures   = doAggregation(totalFeaturesVec, valFeatures.values)
-aggTestFeatures  = doAggregation(totalFeaturesVec, testFeatures.values)
+# # performing the neighbourhood aggregation
+# aggTrainFeatures = findNeighbourAggregation(trainFeatures.values)
+# aggValFeatures   = doAggregation(totalFeaturesVec, valFeatures.values)
+# aggTestFeatures  = doAggregation(totalFeaturesVec, testFeatures.values)
 
-W, Z = trainGCN(aggTrainFeatures, interpretLabel(trainLabels.values))
+# W, Z = trainGCN(aggTrainFeatures, interpretLabel(trainLabels.values))
 
-trainAcc = computeAcc(W, Z, aggTrainFeatures, interpretLabel(trainLabels.values))
-valAcc   = computeAcc(W, Z, aggValFeatures, interpretLabel(valLabels.values))
-testAcc  = computeAcc(W, Z, aggTestFeatures, interpretLabel(testLabels.values))
+# trainAcc = computeAcc(W, Z, aggTrainFeatures, interpretLabel(trainLabels.values))
+# valAcc   = computeAcc(W, Z, aggValFeatures, interpretLabel(valLabels.values))
+# testAcc  = computeAcc(W, Z, aggTestFeatures, interpretLabel(testLabels.values))
 
-print('----------GCN---------')
-print('Train Accuracy : ', trainAcc)
-print('Val   Accuracy : ', valAcc)
-print('Test  Accuracy : ', testAcc)
+# print('----------GCN---------')
+# print('Train Accuracy : ', trainAcc)
+# print('Val   Accuracy : ', valAcc)
+# print('Test  Accuracy : ', testAcc)

@@ -6,6 +6,7 @@ from tqdm import tqdm
 import numpy as np
 import random
 import torch.nn.functional as F
+from split import *
 
 epsilon = 0.000000000001
 class Warp(object):
@@ -303,8 +304,19 @@ def gen_A(num_classes, t, adj_file):
     _adj = _adj + np.identity(num_classes, np.int)
     return _adj
 
+def gen_A_semantic(adj_file, trick=1, scalar=1):
+    import pickle
+    result = pickle.load(open(adj_file, 'rb'))
+    _adj = result['adj']
+    _nums = result['nums']
+    _nums = _nums[:, np.newaxis]                # transforms [a, b, c] to [[a], [b], [c]]
+    _adj = _adj / _nums
+    _adj = gen_A_with_semantic_weights_iaprtc12(_adj, trick, scalar)
+    return _adj
+
 def gen_adj(A):
     D = torch.pow(A.sum(1).float(), -0.5)
     D = torch.diag(D)
     adj = torch.matmul(torch.matmul(A, D).t(), D)
     return adj
+
