@@ -2,9 +2,11 @@ import numpy as np
 import pickle
 import os
 import csv
+from tqdm import tqdm
+
 path_to_model = '../data/iaprtc12/GCN_ML_Binary_Datasets/model/model.pkl'
-path_to_features = '../data/iaprtc12/GCN_ML_Binary_Datasets/agg_features_train_2000.pkl'
-path_to_annot = '../data/iaprtc12/annotation/iaprtc12_test_annot.csv'
+path_to_features = '../data/iaprtc12/GCN_ML_Binary_Datasets/agg_features_test_2000.pkl'
+path_to_annot = '../data/iaprtc12/annotation/iaprtc12_test_annot_del.csv'
 
 def read_csv(file, dtype):
     with open(file) as f:
@@ -12,7 +14,7 @@ def read_csv(file, dtype):
         return [[dtype(x) for x in row] for row in csvf]
 
 def write_csv(file, matrix):
-    with open(file) as f:
+    with open(file, 'w') as f:
         csvw = csv.writer(f)
         for row in matrix:
             csvw.writerow(row)
@@ -34,9 +36,9 @@ f.close()
 
 weights = read_model_weights(path_to_model)
 
-
-for i in range(0, 1):
-    print(test_features_agg[i].shape, weights[i][0].shape, weights[i][1].shape)
+test_scores = np.zeros((1957,291))
+for i in tqdm(range(0, 291)):
+    # print(test_features_agg[i].shape, weights[i][0].shape, weights[i][1].shape)
     X1 = np.dot(test_features_agg[i], weights[i][0])
     # print(X1.shape)
     X11 = 1 / (1 + np.exp(-(X1)))
@@ -44,6 +46,9 @@ for i in range(0, 1):
     # print(X2.shape)
     X22 = 1 / (1 + np.exp(-(X2)))
 
-    print(X22.shape)
+    X22 = X22.reshape((1957,))
+    test_scores[:, i] = X22
+
+write_csv('test_scores.csv', test_scores)
 
 

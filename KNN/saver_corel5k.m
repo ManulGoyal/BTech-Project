@@ -84,7 +84,7 @@ for i = 1:test_image_count(ids)
             end
             local_labels_cooccurrence(other_nbrs_labels(lbl)) = sum(cooccur(other_nbrs_labels(lbl), nearest_nbr_labels));
         end
-        local_labels_priority = local_labels_freq .* local_labels_cooccurrence;
+        local_labels_priority = local_labels_freq + 0.5*local_labels_cooccurrence;
         transferrable_labels_cnt = numel(other_nbrs_labels);
         [~, other_lbls_sort] = sort(local_labels_priority, 'descend');
         labels(other_lbls_sort(1:min(labels_per_image-sz, transferrable_labels_cnt))) = 1;
@@ -97,4 +97,4 @@ for i = 1:test_image_count(ids)
 end
 
 
-csvwrite("corel5k_knn_output.csv",test_labels);
+csvwrite("corel5k_knn_output_add05.csv",test_labels);

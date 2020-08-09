@@ -279,7 +279,11 @@ class Engine(object):
                 self.state['target'] = self.state['target'].cuda()
 
             self.on_forward(False, model, criterion, data_loader)
-
+            # ff = open('iaprtc12_scores'+str(i)+'.csv', 'w')
+            # ww = csv.writer(ff)
+            # for row in self.state['output']:
+            #     ww.writerow(row)
+            # ff.close()
             # measure elapsed time
             self.state['batch_time_current'] = time.time() - end
             self.state['batch_time'].add(self.state['batch_time_current'])
