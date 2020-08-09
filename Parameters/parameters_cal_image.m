@@ -1,4 +1,4 @@
-function  [results] = parameters_cal(test_labels,iaprtc12_test_annot,test_image)
+function  [results] = parameters_cal_image(test_labels,iaprtc12_test_annot,test_image,dic_size)
 
 
 % sets = {'train', 'test'};
@@ -10,7 +10,9 @@ train_image_count = [4500 18689 17495];
 dict_size = [260 268 291];
 
 ids = 3;
-test_image_count(ids) = test_image
+test_image_count(ids) = test_image;
+dict_size(ids) = dic_size;
+
 % iaprtc12_test_annot = double(vec_read(['datasets/' datasetsCap{ids} '/' datasets{ids} '_test_annot.hvecs']));
 % iaprtc12_train_annot = double(vec_read(['datasets/' datasetsCap{ids} '/' datasets{ids} '_train_annot.hvecs']));
 % iaprtc12_label_train_freq = sum(iaprtc12_train_annot);     

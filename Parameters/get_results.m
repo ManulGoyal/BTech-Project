@@ -1,4 +1,5 @@
-function get_results(test_image_count, annot_file, output_file, save_file)
+function get_results(test_image_count, annot_file, output_file, save_file,choose)
+% choose 1 then label based
 
 dict_size = 291;
 
@@ -35,7 +36,12 @@ for i = 1:test_image_count
     end    
 end
 
-
-results = parameters_cal(output,annot,test_image_count);
-%name of results file
-csvwrite(save_file,results);
+if choose == 1 
+    results = parameters_cal_label(output,annot,test_image_count,dict_size);
+    %name of results file
+    csvwrite(save_file,results);
+else
+    results = parameters_cal_image(output,annot,test_image_count,dict_size);
+    %name of results file
+    csvwrite(save_file,results);
+end
