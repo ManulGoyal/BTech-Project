@@ -40,3 +40,7 @@ templ.pkl
 /Parameters/corel5k_knn_output_mult.txt
 /Parameters/corel5k_test_annot.txt
 /KNN/iaprtc12_distances.mat
+/GCN_ML_Binary/test_pred_normal.csv
+/GCN_ML_Binary/test_pred_sem.csv
+/Parameters/iaprtc12_bingcn_normal.txt
+/Parameters/iaprtc12_bingcn_sem.txt

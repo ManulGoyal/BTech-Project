@@ -1,4 +1,4 @@
-function sampling2(score_matrix,images,labels,save_file)
+function sampling3(score_matrix,images,labels,save_file)
 
     % score_matrix = 'testty.txt'
     % images = 2
@@ -14,7 +14,7 @@ function sampling2(score_matrix,images,labels,save_file)
     
     fclose(fileId);
     
-    input_matrix = zeros(images,labels)
+    input_matrix = zeros(images,labels);
     for i = 1:images
         for j = 1:labels
             input_matrix(i,j) = score_read{1,i}(j,1);
@@ -218,9 +218,9 @@ function sampling2(score_matrix,images,labels,save_file)
     289, 1; %woman, adult
     ];
     
-    same_matrix = zeros(labels,labels)
-    parent_matrix = zeros(labels,labels)
-    annot = zeros(images,labels)
+    same_matrix = zeros(labels,labels);
+    parent_matrix = zeros(labels,labels);
+    annot = zeros(images,labels);
     
     for i = 1:10
         same_matrix(same_meaning_pair(i,1),same_meaning_pair(i,2)) = 1;
@@ -248,5 +248,5 @@ function sampling2(score_matrix,images,labels,save_file)
     
     end
     % a = annot
-    csvwrite(save_file,annot)
+    csvwrite(save_file,annot);
 end

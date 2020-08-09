@@ -1,4 +1,4 @@
-function sampling2(score_matrix,images,labels,save_file)
+function sampling2n(score_matrix,images,labels,save_file)
 
 % score_matrix = 'testty.txt'
 % images = 2
@@ -250,36 +250,37 @@ for i = 1:images
         end
 
     end
-    if count > 5
-        for j = 1:count
-            for k = j+1:count
-                if same_matrix(label_index(j),label_index(k)) == 1
-                    if label_scores(k) == 1
-                        count = count - 1;
-                    end
-                    label_scores(k) = 0;
-                end
-            end
-        end
-        if count > 5
-            for j = 1:count
-                for k = 1:count
-                    if(parent_matrix(label_index(j),label_index(k))) == 1
-                        if label_scores(j) == 1
-                            count = count - 1;
-                        end
-                        label_scores(j) = 0;
-                    end
-                end
-            end 
-        end
+    % if count > 5
+    %     for j = 1:count
+    %         for k = j+1:count
+    %             if same_matrix(label_index(j),label_index(k)) == 1
+    %                 if label_scores(k) == 1
+    %                     count = count - 1;
+    %                 end
+    %                 label_scores(k) = 0;
+    %             end
+    %         end
+    %     end
+    %     if count > 5
+    %         for j = 1:count
+    %             for k = 1:count
+    %                 if(parent_matrix(label_index(j),label_index(k))) == 1
+    %                     if label_scores(j) == 1
+    %                         count = count - 1;
+    %                     end
+    %                     label_scores(j) = 0;
+    %                 end
+    %             end
+    %         end 
+    %     end
         
-    end
+    % end
     still_there = find(label_scores==1);
     % sss = label_index
-    for j = 1:5
-        if numel(still_there) < j
-            break
+    % sss = still_there
+    for j = 1:numel(still_there)
+        % if numel(still_there) < j
+        %     break
         end
         ss = label_index(still_there(j));
         annot(i,ss) = 1;
@@ -287,6 +288,6 @@ for i = 1:images
     end
 
 end
-% a = annot
+a = annot
 csvwrite(save_file,annot);
 % end
