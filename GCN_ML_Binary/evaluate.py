@@ -49,6 +49,6 @@ for i in tqdm(range(0, 291)):
     X22 = X22.reshape((1957,))
     test_scores[:, i] = X22
 
-write_csv('test_scores.csv', test_scores)
+write_csv('test_scores_2.csv', test_scores)
 
 
