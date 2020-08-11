@@ -2,10 +2,10 @@
 All our models are explained in our report
 
 ### Models 
-Baseline Approach -> KNN
-ML-GCN -> ML-GCN
-BIN-GCN -> GCN-ML-Binary
-Metrics Calculation -> Parameters
+- Baseline Approach -> KNN
+- ML-GCN -> ML-GCN
+- BIN-GCN -> GCN-ML-Binary
+- Metrics Calculation -> Parameters
 
 
 ### Requirements
